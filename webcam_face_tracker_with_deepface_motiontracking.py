@@ -7,10 +7,6 @@ from datetime import datetime
 from insightface.app import FaceAnalysis
 from deepface import DeepFace
 
-# ==============================
-# CONFIGURATION
-# ==============================
-
 PROCESS_INTERVAL = 0.3
 FACE_MATCH_THRESHOLD = 0.45
 DEEPFACE_THRESHOLD = 0.6
@@ -20,15 +16,7 @@ SAVE_FOLDER = "captured_faces"
 
 SAVE_COOLDOWN = 5
 
-# ==============================
-# TRACKING MEMORY
-# ==============================
-
 tracked_people = {}
-
-# ==============================
-# DATABASE
-# ==============================
 
 print("Connecting to ChromaDB...")
 
@@ -41,26 +29,14 @@ collection = client.get_or_create_collection(
 
 print("Database ready")
 
-# ==============================
-# LOAD MODELS
-# ==============================
-
 print("Loading InsightFace...")
 app = FaceAnalysis()
 app.prepare(ctx_id=0, det_size=(640,640))
 
 print("DeepFace ready")
 
-# ==============================
-# CREATE FOLDER
-# ==============================
-
 if not os.path.exists(SAVE_FOLDER):
     os.makedirs(SAVE_FOLDER)
-
-# ==============================
-# START WEBCAM
-# ==============================
 
 cap = cv2.VideoCapture(0)
 
@@ -72,10 +48,6 @@ print("Webcam started. Press Q to exit.")
 
 last_process_time = 0
 
-# ==============================
-# HELPER: DeepFace verification
-# ==============================
-
 def verify_with_deepface(img1_path, img2_path):
     try:
         result = DeepFace.verify(
@@ -86,11 +58,6 @@ def verify_with_deepface(img1_path, img2_path):
         return result["distance"] < DEEPFACE_THRESHOLD
     except:
         return False
-
-# ==============================
-# MAIN LOOP
-# ==============================
-
 while True:
 
     ret, frame = cap.read()
@@ -124,9 +91,6 @@ while True:
             embedding = face.embedding.tolist()
             person_id = None
 
-            # ==========================
-            # PRIMARY: InsightFace match
-            # ==========================
 
             if collection.count() > 0:
 
@@ -142,9 +106,6 @@ while True:
                         person_id = results["metadatas"][0][0]["person_id"]
 
                     else:
-                        # ==========================
-                        # SECONDARY: DeepFace verify
-                        # ==========================
 
                         candidate = results["metadatas"][0][0]
                         existing_img = candidate["image_path"]
@@ -158,17 +119,10 @@ while True:
                         if os.path.exists(temp_path):
                             os.remove(temp_path)
 
-            # ==========================
-            # NEW PERSON
-            # ==========================
-
             if not person_id:
                 person_id = f"person_{str(uuid.uuid4())[:6]}"
                 print("New person:", person_id)
 
-            # ==========================
-            # TRACKING + COOLDOWN
-            # ==========================
 
             now = time.time()
             last_seen = tracked_people.get(person_id, 0)
@@ -176,10 +130,6 @@ while True:
             should_save = (now - last_seen) > SAVE_COOLDOWN
 
             tracked_people[person_id] = now
-
-            # ==========================
-            # SAVE
-            # ==========================
 
             if should_save:
 
@@ -206,10 +156,6 @@ while True:
                 )
 
                 print(f"Saved {person_id}")
-
-            # ==========================
-            # DRAW
-            # ==========================
 
             cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),2)
 
