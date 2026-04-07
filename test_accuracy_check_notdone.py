@@ -2,17 +2,10 @@ import os
 import cv2
 import numpy as np
 from itertools import combinations
-from insightface.app import FaceAnalysis
 
-# -----------------------------
-# CONFIG
-# -----------------------------
 DATASET_PATH = "C:/Users/Vrushti/OneDrive/Desktop/ai_recognition/test_data"
 THRESHOLD = 0.45
 
-# -----------------------------
-# LOAD MODEL (SAFE WAY)
-# -----------------------------
 print("🔄 Loading InsightFace model...")
 
 app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
