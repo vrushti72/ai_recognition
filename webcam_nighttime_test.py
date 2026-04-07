@@ -9,9 +9,6 @@ from datetime import datetime
 import os
 import sys
 
-# ==========================================
-# CONFIGURATION
-# ==========================================
 WEBCAM_INDEX = 0
 PROCESS_INTERVAL = 0.1
 FACE_MATCH_THRESHOLD = 0.55
@@ -20,28 +17,19 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "live_video_db")
 SAVE_FOLDER = os.path.join(SCRIPT_DIR, "captured_faces")
 
-# ==========================================
-# DATABASE
-# ==========================================
 db_client = chromadb.PersistentClient(path=DB_PATH)
 collection = db_client.get_or_create_collection(
     name="face_embeddings",
     metadata={"hnsw:space": "cosine"}
 )
 
-# ==========================================
-# MODEL (SAFE CPU VERSION)
-# ==========================================
-print("⏳ Loading InsightFace (CPU mode for safety)...")
+print(" Loading InsightFace (CPU mode for safety)...")
 
 app = FaceAnalysis(name='antelopev2', providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 
-print("✅ Model loaded successfully")
+print("Model loaded successfully")
 
-# ==========================================
-# WEBCAM STREAM
-# ==========================================
 class WebcamStream:
     def __init__(self, index):
         self.stream = cv2.VideoCapture(index)
@@ -65,14 +53,11 @@ class WebcamStream:
         self.stopped = True
         self.stream.release()
 
-# ==========================================
-# PREPROCESSING (NIGHT PIPELINE)
-# ==========================================
 def preprocess_frame(frame, cam):
 
     # Print frame shape once
     if not cam.printed_shape:
-        print("📏 Frame shape:", frame.shape)
+        print(" Frame shape:", frame.shape)
         cam.printed_shape = True
 
     # Convert grayscale → BGR if needed
@@ -99,9 +84,6 @@ def preprocess_frame(frame, cam):
 
     return frame
 
-# ==========================================
-# PROCESS FUNCTION
-# ==========================================
 def process_frame(cam):
     if cam.frame is None:
         return
@@ -145,7 +127,7 @@ def process_frame(cam):
 
             if not person_id:
                 person_id = f"person_{str(uuid.uuid4())[:8]}"
-                print(f"🆕 New Person: {person_id}")
+                print(f"New Person: {person_id}")
 
             # Save image
             person_folder = os.path.join(SAVE_FOLDER, person_id)
@@ -167,12 +149,9 @@ def process_frame(cam):
 
     cam.last_process_time = current_time
 
-# ==========================================
-# MAIN LOOP
-# ==========================================
 cam = WebcamStream(WEBCAM_INDEX).start()
 
-print("🚀 Webcam running... Press 'q' to exit")
+print(" Webcam running... Press 'q' to exit")
 
 try:
     while True:
@@ -189,4 +168,4 @@ except KeyboardInterrupt:
 
 cam.stop()
 cv2.destroyAllWindows()
-print("🛑 System stopped")
+print(" System stopped")
