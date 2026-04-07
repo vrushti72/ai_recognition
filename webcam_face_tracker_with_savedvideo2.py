@@ -9,7 +9,7 @@ from insightface.app import FaceAnalysis
 VIDEO_PATH = "C:/Users/Vrushti/OneDrive/Desktop/ai_recognition/videos/video1.mp4"
 
 FACE_MATCH_THRESHOLD = 0.5
-SAVE_INTERVAL = 5   # 🔥 save same face every 5 sec only
+SAVE_INTERVAL = 5  
 
 DB_PATH = "video_face_db"
 SAVE_FOLDER = "captured_faces"
@@ -33,21 +33,21 @@ profile_number = 1
 cap = cv2.VideoCapture(VIDEO_PATH)
 
 if not cap.isOpened():
-    print("❌ Video not found")
+    print(" Video not found")
     exit()
 
 fps = cap.get(cv2.CAP_PROP_FPS)
 delay = int(1000 / fps) if fps > 0 else 30
 
-print("🎥 Video started...\n")
+print(" Video started...\n")
 
 while True:
 
     ret, frame = cap.read()
     if not ret:
-        print("\n✅ Video Completed\n")
+        print("\nVideo Completed\n")
 
-        print("📊 FINAL REPORT:")
+        print(" FINAL REPORT:")
         for pid in person_counter:
             print(f"Profile {person_index_map[pid]} → Seen {person_counter[pid]} times")
         break
@@ -88,7 +88,7 @@ while True:
             person_index_map[person_id] = profile_number
             last_saved_time[person_id] = 0
 
-            print(f"🆕 New Face → Profile {profile_number}")
+            print(f"New Face → Profile {profile_number}")
             profile_number += 1
 
         # COUNT (no spam)
@@ -122,7 +122,6 @@ while True:
 
                 last_saved_time[person_id] = current_time
 
-        # DRAW
         label = f"P{person_index_map[person_id]} ({person_counter[person_id]})"
 
         cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),2)
